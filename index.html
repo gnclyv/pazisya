@@ -233,93 +233,102 @@
       return a;
     }
 
-    function generateSchedule() {
-      if (staff.length === 0) {
-        alert("Əvvəlcə ən azı bir neçə ofisiant daxil edin!");
-        return;
-      }
+   function generateSchedule() {
+  if (staff.length === 0) {
+    alert("Əvvəlcə ən azı bir neçə ofisiant daxil edin!");
+    return;
+  }
 
-      const day = parseInt(document.getElementById("daySelect").value);
+  const day = parseInt(document.getElementById("daySelect").value);
 
-      // İşçiləri elə sıralayırıq ki, əvvəlki pozisiyası olanlar üstünlüklə yeni pozisiyalara paylansın
-      let fullWaiters = shuffle(staff.filter(w => w.status === 'full'));
-      let partWaiters = shuffle(staff.filter(w => w.status === 'part'));
+  let fullWaiters = shuffle(staff.filter(w => w.status === 'full'));
+  let partWaiters = shuffle(staff.filter(w => w.status === 'part'));
 
-      let grouped = { 'A': [], 'B': [], 'C': [], 'D': [], 'Kabinet': [] };
-      let todayAssignments = {}; // name -> position
+  let grouped = { 'A': [], 'B': [], 'C': [], 'D': [], 'Kabinet': [] };
+  let todayAssignments = {};
 
-      // Helper: Bircə işçini götürüb, onun dünənki pozisiyası İLE üst-üstə düşməyən pozisiyaya qoyur
-      function findBestCandidate(candidates, targetPos) {
-        // Öncliklə dünən targetPos-da İŞLƏMƏMİŞ işçini tapırıq
-        let idx = candidates.findIndex(w => history[w.name] !== targetPos);
-        if (idx !== -1) {
-          return candidates.splice(idx, 1)[0];
-        }
-        // Əgər məcbur qalsaq (məcburi şəraitdə) ilk adamı veririk
-        return candidates.shift();
-      }
+  function findBestCandidate(candidates, targetPos) {
+    let idx = candidates.findIndex(w => history[w.name] !== targetPos);
+    if (idx !== -1) {
+      return candidates.splice(idx, 1)[0];
+    }
+    return candidates.shift();
+  }
 
-      // 1. A, C, D GÜNDÜZ (11:00-21:00) -> DƏQİQ 1 NƏFƏR
-      const dayPositions = ['A', 'C', 'D'];
-      dayPositions.forEach(pos => {
-        if (fullWaiters.length > 0) {
-          let worker = findBestCandidate(fullWaiters, pos);
-          if (worker) {
-            grouped[pos].push({
-              name: worker.name,
-              shift: SHIFT_FULL,
-              type: 'day'
-            });
-            todayAssignments[worker.name] = pos;
-          }
-        }
-      });
-
-      // 2. B VƏ KABİNET -> DƏQİQ 1 NƏFƏR GECƏ (17:00-03:00)
-      const singleNightPositions = ['B', 'Kabinet'];
-      singleNightPositions.forEach(pos => {
-        let worker = null;
-        if (partWaiters.length > 0) {
-          worker = findBestCandidate(partWaiters, pos);
-        } else if (fullWaiters.length > 0) {
-          worker = findBestCandidate(fullWaiters, pos);
-        }
-
-        if (worker) {
-          grouped[pos].push({
-            name: worker.name,
-            shift: SHIFT_PART,
-            type: 'night'
-          });
-          todayAssignments[worker.name] = pos;
-        }
-      });
-
-      // 3. GERİDƏ QALAN İŞÇİLƏR -> A, C, D GECƏ SMENİNƏ (17:00-03:00)
-      let remainingWorkers = shuffle([...fullWaiters, ...partWaiters]);
-      let nightPosIndex = 0;
-
-      remainingWorkers.forEach(worker => {
-        // Dünənki pozisiyası ilə eyni olmamağa çalışırıq
-        let preferredPos = dayPositions.find(p => history[worker.name] !== p);
-        let pos = preferredPos || dayPositions[nightPosIndex % dayPositions.length];
-
+  // 1. GÜNDÜZ ŞTATLARINI TƏYİN ET (11:00 - A, C, D üçün 1 nəfər)
+  const dayPositions = ['A', 'C', 'D'];
+  dayPositions.forEach(pos => {
+    if (fullWaiters.length > 0) {
+      let worker = findBestCandidate(fullWaiters, pos);
+      if (worker) {
         grouped[pos].push({
           name: worker.name,
-          shift: SHIFT_PART,
-          type: 'night'
+          shift: SHIFT_FULL,
+          type: 'day'
         });
         todayAssignments[worker.name] = pos;
-        nightPosIndex++;
-      });
-
-      // Bütün yeni pozisiyaları Keçmiş Yaddaşa YAZIRIQ ki, sabah eyni olmasın!
-      Object.assign(history, todayAssignments);
-      localStorage.setItem("restoran_history_v7", JSON.stringify(history));
-
-      renderStaff(); // Yaddaş interfeysdə göstərilsin
-      renderOutput(day, grouped);
+      }
     }
+  });
+
+  // 2. B VƏ KABİNET ÜÇÜN DƏQİQ 1 NƏFƏR TƏYİN ET (17:00)
+  const singleNightPositions = ['B', 'Kabinet'];
+  singleNightPositions.forEach(pos => {
+    let worker = null;
+    if (partWaiters.length > 0) {
+      worker = findBestCandidate(partWaiters, pos);
+    } else if (fullWaiters.length > 0) {
+      worker = findBestCandidate(fullWaiters, pos);
+    }
+
+    if (worker) {
+      grouped[pos].push({
+        name: worker.name,
+        shift: SHIFT_PART,
+        type: 'night'
+      });
+      todayAssignments[worker.name] = pos;
+    }
+  });
+
+  // 3. QALAN BÜTÜN İŞÇİLƏRİ (17:00) A, C, D POZİSİYALARINA BƏRABƏR VƏ MAX 2 NƏFƏR LİMİTİLƏ PAYLAŞDIR
+  let remainingWorkers = shuffle([...fullWaiters, ...partWaiters]);
+
+  remainingWorkers.forEach(worker => {
+    // A, C, D arasında ən az yarı-ştat işçisi olan və max 2 nəfər limitini keçməyən pozisiyanı tap
+    let availablePositions = dayPositions.filter(p => {
+      let nightCount = grouped[p].filter(w => w.shift === SHIFT_PART).length;
+      return nightCount < 2; // Hər pozisiyada max 2 ədəd 17:00 ola bilsin
+    });
+
+    // Əgər hamısı dolubsa (2-dən çox işçi varsa), məcburən ən az olanına at
+    if (availablePositions.length === 0) {
+      availablePositions = [...dayPositions];
+    }
+
+    // Əvvəlki gün işləmədiyi pozisiyaya üstünlük ver
+    let targetPos = availablePositions.find(p => history[worker.name] !== p);
+    
+    if (!targetPos) {
+      // Minimum işçisi olan pozisiyanı seç
+      availablePositions.sort((a, b) => grouped[a].length - grouped[b].length);
+      targetPos = availablePositions[0];
+    }
+
+    grouped[targetPos].push({
+      name: worker.name,
+      shift: SHIFT_PART,
+      type: 'night'
+    });
+    todayAssignments[worker.name] = targetPos;
+  });
+
+  Object.assign(history, todayAssignments);
+  localStorage.setItem("restoran_history_v8", JSON.stringify(history));
+
+  renderStaff();
+  renderOutput(day, grouped);
+}
 
     function renderOutput(day, grouped) {
       const container = document.getElementById("outputContainer");
