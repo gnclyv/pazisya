@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="az" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ofisiant Növbə və Rotasiya Sistemi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #090d16; 
+      color: #f1f5f9; 
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-input {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-input:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12 antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-800/80 bg-slate-950/50 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500 bg-clip-text text-transparent">
+          Restoran Növbə və Rotasiya
+        </h1>
+        <p class="text-xs text-slate-400 mt-0.5">Məcburi Hər Gün Fərqli Pozisiya Sistemi v3.0</p>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-medium text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Rotasiya Yaddaşı Aktivdir
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- SOL PANEL: İŞÇİ İDARƏSİ -->
+      <div class="lg:col-span-4 space-y-6">
+        <div class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-5">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-100 flex items-center gap-2">
+              <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              İşçi Siyahısı
+            </h2>
+            <span id="staffCount" class="text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full font-mono">0 nəfər</span>
+          </div>
+
+          <!-- FORM -->
+          <form onsubmit="addStaff(event)" class="space-y-3 mb-5">
+            <div>
+              <input type="text" id="nameInput" placeholder="Ofisiantın adı..." class="w-full glass-input text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none transition-all placeholder:text-slate-500" required>
+            </div>
+            <div class="flex gap-2">
+              <select id="statusSelect" class="flex-1 glass-input text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:outline-none cursor-pointer">
+                <option value="full" class="bg-slate-900 text-slate-200">Tam Ştat (11:00)</option>
+                <option value="part" class="bg-slate-900 text-slate-200">Yarı-Ştat (17:00)</option>
+              </select>
+              <button type="submit" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+            </div>
+          </form>
+
+          <!-- LIST -->
+          <div id="staffList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar"></div>
+
+          <div class="mt-4 pt-4 border-t border-slate-800/80">
+            <button onclick="resetHistory()" class="w-full text-xs text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 py-2 rounded-xl transition-all">
+              Pozisiya Keçmişini Sıfırla
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAĞ PANEL: İDARƏ VƏ CƏDVƏL -->
+      <div class="lg:col-span-8 space-y-6">
+        
+        <!-- CONTROL BAR -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <label class="text-xs sm:text-sm font-medium text-slate-300 whitespace-nowrap">Günü seçin:</label>
+            <select id="daySelect" class="w-full sm:w-auto glass-input text-slate-200 text-sm font-medium rounded-xl px-3.5 py-2 focus:outline-none cursor-pointer">
+              <option value="1" class="bg-slate-900">1. Bazardüzü</option>
+              <option value="2" class="bg-slate-900">2. Çərşənbə axşamı</option>
+              <option value="3" class="bg-slate-900">3. Çərşənbə</option>
+              <option value="4" class="bg-slate-900">4. Cümə axşamı</option>
+              <option value="5" class="bg-slate-900">5. Cümə</option>
+              <option value="6" class="bg-slate-900">6. Şənbə</option>
+              <option value="7" class="bg-slate-900">7. Bazar</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="generateSchedule()" class="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
+              Qrafik Yarat
+            </button>
+            <button onclick="copyToClipboard()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-4 py-2.5 rounded-xl text-sm transition-all border border-slate-700 flex items-center justify-center gap-2 active:scale-[0.98]">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+              <span>Kopyala</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- OUTPUT CONTAINER -->
+        <div id="outputContainer" class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl min-h-[380px]">
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <p class="text-slate-300 font-medium">Cədvəl hələ yaradılmayıb</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-xs">Ofisiantların pozisiyaları avtomatik rotasiya olunaraq yenilənəcək.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let staff = JSON.parse(localStorage.getItem("restoran_staff_v7")) || [];
+    // İŞÇİLƏRİN KEÇMİŞ POZİSİYALARI (Dünən harda işləyib yadda saxlayır)
+    let history = JSON.parse(localStorage.getItem("restoran_history_v7")) || {};
+
+    const DAY_NAMES = [
+      "Bazardüzü", "Çərşənbə axşamı", "Çərşənbə", 
+      "Cümə axşamı", "Cümə", "Şənbə", "Bazar"
+    ];
+
+    const SHIFT_FULL = "11:00 - 21:00";
+    const SHIFT_PART = "17:00 - 03:00";
+
+    function renderStaff() {
+      const listEl = document.getElementById("staffList");
+      document.getElementById("staffCount").innerText = `${staff.length} nəfər`;
+      listEl.innerHTML = "";
+
+      if (staff.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center">
+            <p class="text-xs text-slate-500 italic">Siyahı boşdur. Ofisiant daxil edin.</p>
+          </div>`;
+        return;
+      }
+
+      staff.forEach((s, idx) => {
+        const isPart = s.status === 'part';
+        const lastPos = history[s.name] || "Yoxdur";
+        listEl.innerHTML += `
+          <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800/80 rounded-xl px-3.5 py-2.5 transition-all hover:border-slate-700">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+              <span class="w-2 h-2 rounded-full ${isPart ? 'bg-indigo-400' : 'bg-amber-400'}"></span>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-slate-200 font-medium text-sm truncate">${s.name}</span>
+                  <span class="text-[10px] font-medium px-2 py-0.2 rounded-full ${isPart ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                    ${isPart ? 'Yarı-Ştat' : 'Tam'}
+                  </span>
+                </div>
+                <p class="text-[10px] text-slate-500">Əvvəlki pozisiya: <span class="text-amber-500/80">${lastPos}</span></p>
+              </div>
+            </div>
+            <button onclick="removeStaff(${idx})" class="text-slate-500 hover:text-rose-400 p-1 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+        `;
+      });
+
+      localStorage.setItem("restoran_staff_v7", JSON.stringify(staff));
+    }
+
+    function addStaff(e) {
+      if (e) e.preventDefault();
+      const nameInput = document.getElementById("nameInput");
+      const statusSelect = document.getElementById("statusSelect");
+      const name = nameInput.value.trim();
+
+      if (!name) return;
+
+      staff.push({
+        id: Date.now() + Math.random(),
+        name: name,
+        status: statusSelect.value
+      });
+
+      nameInput.value = "";
+      renderStaff();
+    }
+
+    function removeStaff(idx) {
+      const removed = staff[idx];
+      if (removed && history[removed.name]) {
+        delete history[removed.name];
+        localStorage.setItem("restoran_history_v7", JSON.stringify(history));
+      }
+      staff.splice(idx, 1);
+      renderStaff();
+    }
+
+    function resetHistory() {
+      if (confirm("Bütün keçmiş pozisiya yaddaşı sıfırlansın?")) {
+        history = {};
+        localStorage.removeItem("restoran_history_v7");
+        renderStaff();
+        alert("Yaddaş sıfırlandı!");
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function generateSchedule() {
+      if (staff.length === 0) {
+        alert("Əvvəlcə ən azı bir neçə ofisiant daxil edin!");
+        return;
+      }
+
+      const day = parseInt(document.getElementById("daySelect").value);
+
+      // İşçiləri elə sıralayırıq ki, əvvəlki pozisiyası olanlar üstünlüklə yeni pozisiyalara paylansın
+      let fullWaiters = shuffle(staff.filter(w => w.status === 'full'));
+      let partWaiters = shuffle(staff.filter(w => w.status === 'part'));
+
+      let grouped = { 'A': [], 'B': [], 'C': [], 'D': [], 'Kabinet': [] };
+      let todayAssignments = {}; // name -> position
+
+      // Helper: Bircə işçini götürüb, onun dünənki pozisiyası İLE üst-üstə düşməyən pozisiyaya qoyur
+      function findBestCandidate(candidates, targetPos) {
+        // Öncliklə dünən targetPos-da İŞLƏMƏMİŞ işçini tapırıq
+        let idx = candidates.findIndex(w => history[w.name] !== targetPos);
+        if (idx !== -1) {
+          return candidates.splice(idx, 1)[0];
+        }
+        // Əgər məcbur qalsaq (məcburi şəraitdə) ilk adamı veririk
+        return candidates.shift();
+      }
+
+      // 1. A, C, D GÜNDÜZ (11:00-21:00) -> DƏQİQ 1 NƏFƏR
+      const dayPositions = ['A', 'C', 'D'];
+      dayPositions.forEach(pos => {
+        if (fullWaiters.length > 0) {
+          let worker = findBestCandidate(fullWaiters, pos);
+          if (worker) {
+            grouped[pos].push({
+              name: worker.name,
+              shift: SHIFT_FULL,
+              type: 'day'
+            });
+            todayAssignments[worker.name] = pos;
+          }
+        }
+      });
+
+      // 2. B VƏ KABİNET -> DƏQİQ 1 NƏFƏR GECƏ (17:00-03:00)
+      const singleNightPositions = ['B', 'Kabinet'];
+      singleNightPositions.forEach(pos => {
+        let worker = null;
+        if (partWaiters.length > 0) {
+          worker = findBestCandidate(partWaiters, pos);
+        } else if (fullWaiters.length > 0) {
+          worker = findBestCandidate(fullWaiters, pos);
+        }
+
+        if (worker) {
+          grouped[pos].push({
+            name: worker.name,
+            shift: SHIFT_PART,
+            type: 'night'
+          });
+          todayAssignments[worker.name] = pos;
+        }
+      });
+
+      // 3. GERİDƏ QALAN İŞÇİLƏR -> A, C, D GECƏ SMENİNƏ (17:00-03:00)
+      let remainingWorkers = shuffle([...fullWaiters, ...partWaiters]);
+      let nightPosIndex = 0;
+
+      remainingWorkers.forEach(worker => {
+        // Dünənki pozisiyası ilə eyni olmamağa çalışırıq
+        let preferredPos = dayPositions.find(p => history[worker.name] !== p);
+        let pos = preferredPos || dayPositions[nightPosIndex % dayPositions.length];
+
+        grouped[pos].push({
+          name: worker.name,
+          shift: SHIFT_PART,
+          type: 'night'
+        });
+        todayAssignments[worker.name] = pos;
+        nightPosIndex++;
+      });
+
+      // Bütün yeni pozisiyaları Keçmiş Yaddaşa YAZIRIQ ki, sabah eyni olmasın!
+      Object.assign(history, todayAssignments);
+      localStorage.setItem("restoran_history_v7", JSON.stringify(history));
+
+      renderStaff(); // Yaddaş interfeysdə göstərilsin
+      renderOutput(day, grouped);
+    }
+
+    function renderOutput(day, grouped) {
+      const container = document.getElementById("outputContainer");
+      let html = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800/80 mb-6 gap-2">
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-amber-400">${DAY_NAMES[day - 1]} Gününün Cədvəli</h3>
+            <p class="text-xs text-emerald-400 mt-0.5">✓ Dünənki pozisiyalar nəzərə alınaraq növbələr dəyişdirildi</p>
+          </div>
+          <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-semibold">
+            ${staff.length} işçi heyətdədir
+          </span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      `;
+
+      const posOrder = ['A', 'B', 'C', 'D', 'Kabinet'];
+
+      posOrder.forEach(pos => {
+        const items = grouped[pos] || [];
+        const isSingleOnly = (pos === 'B' || pos === 'Kabinet');
+
+        html += `
+          <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all ${pos === 'Kabinet' ? 'md:col-span-2' : ''}">
+            <div>
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/50">
+                <span class="flex items-center gap-2 font-bold text-sm sm:text-base text-slate-200">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  ${pos} Pozisiyası
+                </span>
+                ${isSingleOnly ? '<span class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 font-medium">Limit: 1 Nəfər</span>' : ''}
+              </div>
+              <div class="space-y-2">
+        `;
+
+        if (items.length === 0) {
+          html += `<p class="text-xs text-slate-500 italic py-1">• Təyin edilməyib</p>`;
+        } else {
+          items.sort((a, b) => (a.shift > b.shift ? 1 : -1));
+
+          items.forEach(i => {
+            const isNight = i.shift === SHIFT_PART;
+            html += `
+              <div class="flex items-center justify-between text-xs sm:text-sm py-1">
+                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                  <span class="text-slate-600">•</span> ${i.name}
+                </span>
+                <span class="text-[11px] font-mono font-medium ${isNight ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'} border px-2.5 py-1 rounded-md">
+                  ${i.shift}
+                </span>
+              </div>
+            `;
+          });
+        }
+
+        html += `</div></div></div>`;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function copyToClipboard() {
+      const day = parseInt(document.getElementById("daySelect").value);
+      const container = document.getElementById("outputContainer");
+      const allPosBlocks = container.querySelectorAll(".bg-slate-900\\/60");
+
+      if (allPosBlocks.length === 0) {
+        alert("Əvvəlcə qrafik yaradın!");
+        return;
+      }
+
+      let text = `📅 *${DAY_NAMES[day - 1].toUpperCase()} GÜNÜNÜN NÖVBƏ CƏDVƏLİ*\n\n`;
+
+      allPosBlocks.forEach((block) => {
+        const titleEl = block.querySelector("span.font-bold");
+        const title = titleEl ? titleEl.innerText.trim() : "";
+        text += `*[ ${title} ]*\n`;
+
+        const items = block.querySelectorAll(".flex.items-center.justify-between.text-xs");
+        items.forEach(item => {
+          const name = item.querySelector("span:first-child").innerText.replace("•", "").trim();
+          const shift = item.querySelector("span:last-child").innerText.trim();
+          text += `${name} — ${shift}\n`;
+        });
+
+        text += `\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Cədvəl bloklar şəklində kopyalandı! WhatsApp-a yapışdıra bilərsiniz.");
+      });
+    }
+
+    // İlk yüklənmə
+    renderStaff();
+  </script>
+</body>
+</html>
